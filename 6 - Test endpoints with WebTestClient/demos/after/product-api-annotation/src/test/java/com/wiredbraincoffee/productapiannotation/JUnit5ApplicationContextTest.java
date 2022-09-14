@@ -17,6 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
+/**
+ * Autowired ApplicationContext is passed to the static method bindToApplicationContext.
+ * This makes the server (this app) start everytime the test runs.
+ */
 @SpringBootTest
 public class JUnit5ApplicationContextTest {
     private WebTestClient client;

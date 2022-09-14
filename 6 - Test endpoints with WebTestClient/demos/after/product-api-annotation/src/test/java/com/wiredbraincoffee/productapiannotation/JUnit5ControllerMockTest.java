@@ -22,6 +22,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+/**
+ * Unlike ApplicationContextTest, this version doesn't start the server (this app) on every
+ * test. Instead, we use mocks to mock the repository and define what the repository method
+ * should return for each test.
+ */
 @ExtendWith(SpringExtension.class)
 public class JUnit5ControllerMockTest {
     private WebTestClient client;

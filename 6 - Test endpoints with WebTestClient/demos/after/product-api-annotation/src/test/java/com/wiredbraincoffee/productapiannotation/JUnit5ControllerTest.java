@@ -18,6 +18,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
+// contains:
+//@BootstrapWith(SpringBootTestContextBootstrapper.class)
+//@ExtendWith({SpringExtension.class})
 public class JUnit5ControllerTest {
     private WebTestClient client;
 
@@ -30,11 +33,13 @@ public class JUnit5ControllerTest {
     void beforeEach() {
         this.client =
                 WebTestClient
+                        // manual creation of ProductController, can also @Autowired ProductController
                         .bindToController(new ProductController(repository))
                         .configureClient()
                         .baseUrl("/products")
                         .build();
 
+        // Block until the flux completes, so we can use the results for our tests.
         this.expectedList =
                 repository.findAll().collectList().block();
     }
@@ -43,7 +48,7 @@ public class JUnit5ControllerTest {
     void testGetAllProducts() {
         client.get()
                 .uri("/")
-                .exchange()
+                .exchange() // perform the request
                 .expectStatus()
                 .isOk()
                 .expectBodyList(Product.class)
@@ -88,7 +93,7 @@ public class JUnit5ControllerTest {
                 .expectNextCount(2)
                 .consumeNextWith(event ->
                         assertEquals(Long.valueOf(3), event.getEventId()))
-                .thenCancel()
+                .thenCancel() // cancel the stream
                 .verify();
     }
 }

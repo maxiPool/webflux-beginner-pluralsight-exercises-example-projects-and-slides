@@ -23,6 +23,20 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+/**
+ * We can load only some beans from the ApplicationContext instead of all of them.
+ * It will autoconfigure those beans.
+ * Note: it will not create Component, Repository, Service beans.
+ *
+ * It requires to Mock the beans that we created in our app.
+ *  - ProductRepository
+ *  - CommandLineRunner
+ *
+ *  The advantage is that the WebFluxTest will autoconfigure our WebTestClient.
+ *  We can still mutate the automagically configured WebTestClient in the BeforeEach
+ *  method by using the mutate method.
+ *  For example: to define a base url (which is missing in the autoconfigured bean).
+ */
 @WebFluxTest(ProductController.class)
 public class JUnit5WebFluxTestAnnotationTest {
 
@@ -42,6 +56,7 @@ public class JUnit5WebFluxTestAnnotationTest {
         this.expectedList = Arrays.asList(
                 new Product("1", "Big Latte", 2.99)
         );
+        this.client = this.client.mutate().baseUrl("/products").build();
     }
 
     @Test
@@ -50,7 +65,7 @@ public class JUnit5WebFluxTestAnnotationTest {
 
         client
                 .get()
-                .uri("/products")
+                .uri("/")
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -65,7 +80,7 @@ public class JUnit5WebFluxTestAnnotationTest {
 
         client
                 .get()
-                .uri("/products/{id}", id)
+                .uri("/{id}", id)
                 .exchange()
                 .expectStatus()
                 .isNotFound();
@@ -78,7 +93,7 @@ public class JUnit5WebFluxTestAnnotationTest {
 
         client
                 .get()
-                .uri("/products/{id}", expectedProduct.getId())
+                .uri("/{id}", expectedProduct.getId())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -92,7 +107,7 @@ public class JUnit5WebFluxTestAnnotationTest {
                 new ProductEvent(0L, "Product Event");
 
         FluxExchangeResult<ProductEvent> result =
-                client.get().uri("/products/events")
+                client.get().uri("/events")
                         .accept(MediaType.TEXT_EVENT_STREAM)
                         .exchange()
                         .expectStatus().isOk()
